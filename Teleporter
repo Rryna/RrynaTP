@@ -1,0 +1,99 @@
+local player = game.Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+local ScreenGui = Instance.new("ScreenGui")
+local Frame = Instance.new("Frame")
+local CloseButton = Instance.new("TextButton")
+local TextBox = Instance.new("TextBox")
+local TeleportButton = Instance.new("TextButton")
+local Label = Instance.new("TextLabel")
+
+ScreenGui.Name = "MenuGui"
+ScreenGui.Parent = playerGui
+ScreenGui.ResetOnSpawn = false
+
+Frame.Name = "MainFrame"
+Frame.Parent = ScreenGui
+Frame.BackgroundColor3 = Color3.new(1, 0, 0) -- Rengi kırmızı olarak ayarla
+Frame.Position = UDim2.new(0.5, -100, 0.5, -100)
+Frame.Size = UDim2.new(0, 200, 0, 200)
+Frame.Active = true  -- Bu çerçevenin etkin olduğunu belirt
+
+CloseButton.Name = "CloseButton"
+CloseButton.Parent = Frame
+CloseButton.Size = UDim2.new(0, 20, 0, 20)
+CloseButton.Position = UDim2.new(1, -25, 0, 5) -- Sağ üst köşeye yerleştir
+CloseButton.FontSize = Enum.FontSize.Size18
+CloseButton.Text = "×" -- Kapatma işareti
+CloseButton.TextColor3 = Color3.new(0, 0, 0) -- Siyah renk
+CloseButton.BackgroundColor3 = Color3.new(1, 0.6, 0.6) -- Pembe renk
+CloseButton.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
+
+TextBox.Name = "PlayerNameTextBox"
+TextBox.Parent = Frame
+TextBox.Size = UDim2.new(0, 180, 0, 50)
+TextBox.Position = UDim2.new(0.5, -90, 0.2, -25)
+TextBox.PlaceholderText = "Oyuncu Adını Girin"
+TextBox.FontSize = Enum.FontSize.Size24
+
+TeleportButton.Name = "TeleportButton"
+TeleportButton.Parent = Frame
+TeleportButton.Size = UDim2.new(0, 180, 0, 50)
+TeleportButton.Position = UDim2.new(0.5, -90, 0.5, -25)
+TeleportButton.FontSize = Enum.FontSize.Size24
+TeleportButton.Text = "TP!"
+TeleportButton.MouseButton1Click:Connect(function()
+    local playerName = TextBox.Text
+    local targetPlayer = game.Players:FindFirstChild(playerName)
+    
+    if targetPlayer then
+        player.Character:MoveTo(targetPlayer.Character.HumanoidRootPart.Position)
+    else
+        warn("Oyuncu bulunamadı.")
+    end
+end)
+
+Label.Name = "BottomLabel"
+Label.Parent = Frame
+Label.Size = UDim2.new(1, 0, 0, 20)
+Label.Position = UDim2.new(0, 0, 1, -20)
+Label.BackgroundColor3 = Color3.new(1, 1, 1)
+Label.FontSize = Enum.FontSize.Size24
+Label.Text = "Rryna"
+Label.TextColor3 = Color3.new(0, 0, 0)
+
+-- Sürükleme işlevselliğini ekleyin
+local UIS = game:GetService("UserInputService")
+local dragging
+local dragInput
+local dragStart
+local startPos
+
+Frame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = Frame.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+UIS.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+game:GetService("RunService").RenderStepped:Connect(function()
+    if dragging then
+        local delta = dragInput.Position - dragStart
+        Frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
